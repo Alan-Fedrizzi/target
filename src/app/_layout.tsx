@@ -1,13 +1,32 @@
 // import { Slot } from "expo-router";
-import { colors } from "@/theme/colors";
+// import { colors } from "@/theme/colors";
+import { colors } from "@/theme";
 import { Stack } from "expo-router";
 // import { Tabs } from "expo-router";
 // import { MaterialIcons } from "@expo/vector-icons";
+
+import {
+  useFonts,
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_700Bold,
+} from "@expo-google-fonts/inter";
+import { Loading } from "@/components/Loading";
 
 // começa com _ é um arquivo de configuração de rotas
 // pode ter um por pasta, para ter configurações diferentes de cada rota
 
 export default function Layout() {
+  const [fontsLoaded] = useFonts({
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_700Bold,
+  });
+
+  if (!fontsLoaded) {
+    return <Loading />;
+  }
+
   // return <Slot />;
   return (
     <Stack
