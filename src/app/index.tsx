@@ -6,11 +6,17 @@ import { View, Text, Button } from "react-native";
 // expo-router reconhece o que está dentro da pasta app como rota
 // para não precisar do caminho, pode usar o ./
 
+const summary = {
+  total: "R$ 2.680,00",
+  input: { label: "Entradas", value: "R$ 6.184,90" },
+  output: { label: "Saídas", value: "-R$ 883,65" },
+};
+
 // para o expo-router reconhecer como rota, tem que exportar como default
 export default function Index() {
   return (
     <View style={{ flex: 1 }}>
-      <HomeHeader />
+      <HomeHeader data={summary} />
       {/* <Text style={{ fontFamily: fontFamily.bold, fontSize: 34 }}>Index</Text>
 
       <Button title="Target" onPress={() => router.navigate("target")} />
