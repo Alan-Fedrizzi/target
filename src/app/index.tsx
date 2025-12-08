@@ -1,7 +1,9 @@
+import { Button } from "@/components/Button";
 import { HomeHeader } from "@/components/HomeHeader";
-import { View, Text, Button } from "react-native";
-// import { router } from "expo-router";
-// import { fontFamily } from "@/theme/fontFamily";
+import { List } from "@/components/List";
+import { Target } from "@/components/Target";
+import { router } from "expo-router";
+import { View, StatusBar } from "react-native";
 
 // expo-router reconhece o que está dentro da pasta app como rota
 // para não precisar do caminho, pode usar o ./
@@ -12,24 +14,56 @@ const summary = {
   output: { label: "Saídas", value: "-R$ 883,65" },
 };
 
+const targets = [
+  {
+    id: "1",
+    name: "Apple Watch",
+    percentage: "50%",
+    current: "R$ 580,00",
+    target: "R$ 1.790,00",
+  },
+  {
+    id: "2",
+    name: "Comprar cadeira ergonômica ergonômica ergonômica ergonômica ergonômica ergonômica",
+    percentage: "75%",
+    current: "R$ 900,00",
+    target: "R$ 1.200,00",
+  },
+  {
+    id: "3",
+    name: "Fazer uma viagem para o Rio de Janeiro",
+    percentage: "75%",
+    current: "R$ 1.200,00",
+    target: "R$ 3.000,00",
+  },
+];
+
 // para o expo-router reconhecer como rota, tem que exportar como default
 export default function Index() {
   return (
     <View style={{ flex: 1 }}>
-      <HomeHeader data={summary} />
-      {/* <Text style={{ fontFamily: fontFamily.bold, fontSize: 34 }}>Index</Text>
+      <StatusBar barStyle="light-content" />
 
-      <Button title="Target" onPress={() => router.navigate("target")} />
-      <Button
-        title="Transaction"
-        onPress={() => router.navigate("transaction/7")}
+      <HomeHeader data={summary} />
+
+      <List
+        title="Metas"
+        data={targets}
+        // data={[]} // para testar lista vazia
+        renderItem={({ item }) => (
+          <Target
+            data={item}
+            onPress={() => router.navigate(`in-progress/${item.id}`)}
+          />
+        )}
+        keyExtractor={(item) => item.id}
+        emptyMessage="Nenhuma meta. Clique em nova meta para criar."
+        containerStyle={{ paddingHorizontal: 24 }}
       />
-      <Button
-        title="InProgress"
-        onPress={() => router.navigate("in-progress/13")}
-      /> */}
+
+      <View style={{ padding: 24, paddingBottom: 32 }}>
+        <Button title="Nova meta" onPress={() => router.navigate("target")} />
+      </View>
     </View>
   );
 }
-
-// instalando fontes
