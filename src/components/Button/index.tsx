@@ -15,7 +15,7 @@ type Props = TouchableOpacityProps & {
 export function Button({ title, isProcessing = false, ...rest }: Props) {
   return (
     <TouchableOpacity
-      style={styles.container}
+      style={[styles.container, isProcessing && styles.disabled]}
       activeOpacity={0.8}
       disabled={isProcessing}
       {...rest}

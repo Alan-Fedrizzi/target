@@ -16,4 +16,7 @@ export const styles = StyleSheet.create({
     fontFamily: fontFamily.medium,
     color: colors.white,
   },
+  disabled: {
+    opacity: 0.7,
+  },
 });
