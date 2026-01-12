@@ -67,3 +67,5 @@ export default function Index() {
     </View>
   );
 }
+
+// npx expo run:android
