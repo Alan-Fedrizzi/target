@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 // import { Slot } from "expo-router";
 // import { colors } from "@/theme/colors";
 import { colors } from "@/theme";
@@ -12,6 +13,9 @@ import {
   Inter_700Bold,
 } from "@expo-google-fonts/inter";
 import { Loading } from "@/components/Loading";
+
+import { migrate } from "@/database/migrate";
+import { SQLiteProvider } from "expo-sqlite";
 
 // começa com _ é um arquivo de configuração de rotas
 // pode ter um por pasta, para ter configurações diferentes de cada rota
@@ -29,14 +33,19 @@ export default function Layout() {
 
   // return <Slot />;
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        contentStyle: {
-          backgroundColor: colors.white,
-        },
-      }}
-    />
+    // Suspense aguarda nosso banco de dados carregar, enquanto não carrega mostra o Loading
+    <Suspense fallback={<Loading />}>
+      <SQLiteProvider databaseName="target.db" onInit={migrate} useSuspense>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: {
+              backgroundColor: colors.white,
+            },
+          }}
+        />
+      </SQLiteProvider>
+    </Suspense>
   ); // já cria o tipo de navegação
   /*
   return (

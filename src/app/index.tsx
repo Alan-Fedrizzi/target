@@ -68,4 +68,11 @@ export default function Index() {
   );
 }
 
+// rodar development build
+// npx expo prebuild
 // npx expo run:android
+
+// ver banco de dados
+// abrir android studio (abrir pasta android do projeto)
+// View > Tool windows > Device Explorer
+// data > data > com.alanff.target > files > SQLite > target.db
