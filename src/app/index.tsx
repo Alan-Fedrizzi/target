@@ -1,9 +1,12 @@
 import { Button } from "@/components/Button";
 import { HomeHeader } from "@/components/HomeHeader";
 import { List } from "@/components/List";
-import { Target } from "@/components/Target";
-import { router } from "expo-router";
-import { View, StatusBar } from "react-native";
+import { Loading } from "@/components/Loading";
+import { Target, TargetProps } from "@/components/Target";
+import { useTargetDatabase } from "@/database/useTargetDatabase";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
+import { Alert, StatusBar, View } from "react-native";
 
 // expo-router reconhece o que está dentro da pasta app como rota
 // para não precisar do caminho, pode usar o ./
@@ -14,7 +17,7 @@ const summary = {
   output: { label: "Saídas", value: "-R$ 883,65" },
 };
 
-const targets = [
+const TARGETS_MOCK = [
   {
     id: "1",
     name: "Apple Watch",
@@ -40,6 +43,49 @@ const targets = [
 
 // para o expo-router reconhecer como rota, tem que exportar como default
 export default function Index() {
+  const [isFetching, setIsFetching] = useState(true);
+  const [targets, setTargets] = useState<TargetProps[]>([]);
+
+  const targetDatabase = useTargetDatabase();
+
+  async function fetchTargets(): Promise<TargetProps[]> {
+    try {
+      const response = await targetDatabase.listBySavedValue();
+
+      return response.map((item) => ({
+        id: String(item.id),
+        name: item.name,
+        current: String(item.current),
+        percentage: `${item.percentage.toFixed(0)}%`,
+        target: String(item.amount),
+      }));
+    } catch (error) {
+      Alert.alert("Erro", "Não foi possível carregar as metas.");
+      console.log(error);
+    }
+  }
+
+  async function fetchData() {
+    const targetDataPromise = fetchTargets();
+    // para resolver tudo de uma vez só
+    const [targetData] = await Promise.all([targetDataPromise]);
+
+    setTargets(targetData);
+    setIsFetching(false);
+  }
+
+  // useFocusEffect - quando a rota recebe o focus, chama o método
+  // usar com useCallback
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, []),
+  );
+
+  if (isFetching) {
+    return <Loading />;
+  }
+
   return (
     <View style={{ flex: 1 }}>
       <StatusBar barStyle="light-content" />
@@ -76,3 +122,6 @@ export default function Index() {
 // abrir android studio (abrir pasta android do projeto)
 // View > Tool windows > Device Explorer
 // data > data > com.alanff.target > files > SQLite > target.db
+// no beekeeper > SQLite
+// target.db clica com o direito > save as
+// no beekeeper > SQLite > arrasta o arquivo salvo para  Choose File

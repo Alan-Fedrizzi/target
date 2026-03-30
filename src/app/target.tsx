@@ -6,6 +6,7 @@ import { CurrencyInput } from "@/components/CurrencyInput";
 import { Alert, StatusBar, Text, View } from "react-native";
 import { useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
+import { useTargetDatabase } from "@/database/useTargetDatabase";
 
 export default function Target() {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -13,12 +14,13 @@ export default function Target() {
   const [amount, setAmount] = useState(0);
 
   const params = useLocalSearchParams<{ id?: string }>();
+  const targetDatabase = useTargetDatabase();
 
   function handleSave() {
     if (!name.trim() || amount <= 0) {
       return Alert.alert(
         "Atenção",
-        "Preencha o nome da meta e o valor precisa ser maior que zero."
+        "Preencha o nome da meta e o valor precisa ser maior que zero.",
       );
     }
 
@@ -35,6 +37,8 @@ export default function Target() {
 
   async function create() {
     try {
+      await targetDatabase.create({ name, amount });
+
       Alert.alert("Nova Meta", "Meta criada com sucesso!", [
         {
           text: "Ok",
