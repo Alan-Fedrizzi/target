@@ -1,15 +1,16 @@
 import { Button } from "@/components/Button";
 import { List } from "@/components/List";
+import { Loading } from "@/components/Loading";
 import { PageHeader } from "@/components/PageHeader";
 import { Progress } from "@/components/Progress";
 import { Transaction, TransactionProps } from "@/components/Transaction";
-import { Loading } from "@/components/Loading";
+import { useTargetDatabase } from "@/database/useTargetDatabase";
+import { useTransactionsDatabase } from "@/database/useTransactionsDatabase";
+import { numberToCurrency } from "@/utils/numberToCurrency";
 import { TransactionTypes } from "@/utils/TransactionTypes";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
-import { View, Alert } from "react-native";
-import { useTargetDatabase } from "@/database/useTargetDatabase";
 import { useCallback, useState } from "react";
-import { numberToCurrency } from "@/utils/numberToCurrency";
+import { Alert, View } from "react-native";
 
 // mock
 // const details = {
@@ -18,23 +19,26 @@ import { numberToCurrency } from "@/utils/numberToCurrency";
 //   percentage: 25,
 // };
 
-const transactions: TransactionProps[] = [
-  {
-    id: "1",
-    value: "R$ 20,00",
-    date: "12/04/25",
-    type: TransactionTypes.Output,
-  },
-  {
-    id: "2",
-    value: "R$ 300,00",
-    date: "12/04/25",
-    description: "CDB de 110% no banco XPTO",
-    type: TransactionTypes.Input,
-  },
-];
+// const transactions: TransactionProps[] = [
+//   {
+//     id: "1",
+//     value: "R$ 20,00",
+//     date: "12/04/25",
+//     type: TransactionTypes.Output,
+//   },
+//   {
+//     id: "2",
+//     value: "R$ 300,00",
+//     date: "12/04/25",
+//     description: "CDB de 110% no banco XPTO",
+//     type: TransactionTypes.Input,
+//   },
+// ];
 
 export default function InProgress() {
+  const params = useLocalSearchParams<{ id: string }>();
+  const targetDatabase = useTargetDatabase();
+  const transactionsDatabase = useTransactionsDatabase();
   const [isFetching, setIsFetching] = useState(true);
   const [details, setDetails] = useState({
     name: "",
@@ -42,8 +46,7 @@ export default function InProgress() {
     target: "R$ 0,00",
     percentage: 0,
   });
-  const params = useLocalSearchParams<{ id: string }>();
-  const targetDatabase = useTargetDatabase();
+  const [transactions, setTransactions] = useState<TransactionProps[]>([]);
 
   // useFocusEffect - quando a rota recebe o focus, chama o método
   // usar com useCallback
@@ -53,7 +56,7 @@ export default function InProgress() {
     }, []),
   );
 
-  async function fetchDetails() {
+  async function fetchTargetDetails() {
     try {
       const response = await targetDatabase.show(Number(params.id));
 
@@ -69,9 +72,33 @@ export default function InProgress() {
     }
   }
 
+  async function fetchTransactions() {
+    try {
+      const response = await transactionsDatabase.listByTargetId(
+        Number(params.id),
+      );
+
+      setTransactions(
+        response.map((item) => ({
+          id: String(item.id),
+          value: numberToCurrency(item.amount),
+          date: String(item.created_at),
+          description: item.observation,
+          type:
+            item.amount < 0 ? TransactionTypes.Output : TransactionTypes.Input,
+        })),
+      );
+    } catch (error) {
+      Alert.alert("Erro", "Não foi possível carregar as transações.");
+      console.log(error);
+    }
+  }
+
   async function fetchData() {
-    const fetchDetailsPromise = fetchDetails();
-    await Promise.all([fetchDetailsPromise]);
+    const fetchTargetDetailsPromise = fetchTargetDetails();
+    const fetchTransactionsPromise = fetchTransactions();
+
+    await Promise.all([fetchTargetDetailsPromise, fetchTransactionsPromise]);
     setIsFetching(false);
   }
 
